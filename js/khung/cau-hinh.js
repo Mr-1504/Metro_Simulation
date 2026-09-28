@@ -11,5 +11,11 @@ window.CAU_HINH_WEB = {
   DEM_MA: 'lau_dai',
   /* Số luồng tải mã lúc khởi đầu (1–8, mặc định 4). Số luồng tự co về 1 ngay khi gặp trục trặc.
      Đặt 1 nếu mạng cơ quan hay chặn: chậm hơn nhưng êm nhất. */
-  SO_LUONG: 4
+  SO_LUONG: 4,
+  /* Mock local demo chỉ tự bật khi chạy localhost/127.0.0.1.
+     Production (ví dụ GitHub Pages) luôn đi qua Apps Script thật. */
+  MOCK_LOCAL_DEMO: (function(){
+    const h=(location&&location.hostname||'').toLowerCase();
+    return h==='localhost'||h==='127.0.0.1';
+  })()
 };

@@ -116,7 +116,8 @@ async function taiTatCaPhanMa(tong){
 async function napGoi(j){
   ND=j.nguoi_dung; capNhatMenu();
   hien('kd_dang_tai'); loi('');
-  chu('Đang dựng dữ liệu 5 tuyến từ Google Sheet…');
+  const laDemo=!!j.canh_bao_demo;
+  chu(laDemo?'Đang dựng dữ liệu demo local…':'Đang dựng dữ liệu 5 tuyến từ Google Sheet…');
   window.CORE=BANG_DU_LIEU.raCore(j.goi.du_lieu);
   /* Mã tính toán tải theo từng phần: một phản hồi Apps Script không chở nổi cả gói (bị cắt giữa chừng). */
   const tong=+j.goi.so_phan_ma||0;
@@ -165,7 +166,9 @@ async function napGoi(j){
   chu('Đang áp thông số dùng chung…');
   const kq=THONG_SO.ap(j.goi.thong_so);
   daNap=true; manHinh(false); el('kd_nd').hidden=false;
-  bao('Xin chào '+(ND.ho_ten||ND.ten)+' — đã nạp dữ liệu và '+(j.goi.thong_so||[]).length+' thông số từ Google Sheet'+(kq.ap?' ('+kq.ap+' giá trị khác mặc định)':'')+'.');
+  const nguon=laDemo?'bộ fixture local':'Google Sheet';
+  bao('Xin chào '+(ND.ho_ten||ND.ten)+' — đã nạp dữ liệu và '+(j.goi.thong_so||[]).length+' thông số từ '+nguon+(kq.ap?' ('+kq.ap+' giá trị khác mặc định)':'')+'.');
+  if(j.canh_bao_demo){ bao(j.canh_bao_demo); console.warn('[local-demo]',j.canh_bao_demo); }
   if(kq.bo_qua.length) console.warn('[thong-so] bỏ qua:',kq.bo_qua);
 }
 async function batDau(){
@@ -174,6 +177,13 @@ async function batDau(){
     hien('kd_dang_tai'); chu('Đang khôi phục phiên làm việc…');
     try{ await napGoi(await API.goi('khoi_dong',null,{bao:(k,n)=>chu('Đường truyền tới Google trục trặc, đang thử lại lần '+k+'/'+n+'…')})); return; }
     catch(e){ if(e.ma==='PHAI_DOI_MK'){ moDoiMatKhau(true); return; } if(daNap) {loi(e.message);return;} if(e.ma!=='PHIEN') loi(e.message); }
+  }
+  if((window.CAU_HINH_WEB||{}).MOCK_LOCAL_DEMO&&window.MOCK_LOCAL_DEMO_API){
+    hien('kd_dang_tai'); chu('Đang khởi tạo chế độ demo local…');
+    try{
+     const j=await API.goi('dang_nhap',{ten:'demo_local',mat_khau:'local-demo'});
+     API.datToken(j.token); ND=j.nguoi_dung; await napGoi(j); return;
+    }catch(e){ loi('Không khởi tạo được mock local: '+e.message); }
   }
   hien('kd_f_dn'); try{el('kd_ten').focus();}catch(e){}
 }
