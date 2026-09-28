@@ -18,14 +18,32 @@ const NGUOI_DUNG_DEMO={
 
 /* Mã logic tối thiểu cho demo local:
    - phát sự kiện app:san-sang để khoi-dong.js tiếp tục
-   - cung cấp App.toast dạng console để tránh lỗi khi gọi toast */
+   - cung cấp App.toast dạng console để tránh lỗi khi gọi toast
+   - cung cấp fallback no-op cho các hàm runtime (run/tab/zoom/...) để bấm nút không văng ReferenceError */
 const MA_LOGIC_DEMO=[
 "(function(){",
 "  'use strict';",
 "  window.App=window.App||{};",
+"  var daBao={};",
+"  function thongBao(ten){",
+"    if(daBao[ten]) return;",
+"    daBao[ten]=1;",
+"    var msg='[Local Demo] Chức năng \"'+ten+'\" chưa có logic backend đầy đủ trong mock local.';",
+"    try{ if(window.App&&typeof window.App.toast==='function') window.App.toast(msg); else console.info(msg); }catch(e){}",
+"  }",
+"  function boSung(ten){",
+"    if(typeof window[ten]==='function') return;",
+"    window[ten]=function(){ thongBao(ten); return null; };",
+"  }",
+"  function boSungApp(ten){",
+"    if(typeof window.App[ten]==='function') return;",
+"    window.App[ten]=function(){ thongBao('App.'+ten); return null; };",
+"  }",
 "  if(typeof window.App.toast!=='function'){",
 "    window.App.toast=function(msg){ try{ console.info('[Local Demo]', msg); }catch(e){} };",
 "  }",
+"  ['run','tab','setAW','loadXlsx','check','expXlsxKQ','zoomBy','zoomReset','expCSV','expSVG','expPDF','sweep','sens','benchRun','onPat','chkAll','chkIC','optimise'].forEach(boSung);",
+"  ['exportData','exportResults','check','report'].forEach(boSungApp);",
 "  document.dispatchEvent(new Event('app:san-sang'));",
 "})();"
 ].join('\n');
