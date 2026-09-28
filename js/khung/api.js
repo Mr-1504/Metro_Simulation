@@ -44,6 +44,9 @@ async function goiMot(hd,duLieu){
 /* tuyChon.bao(lanThu, tongLan, thongBaoLanTruoc) — để màn hình chờ hiện "đang thử lại".
    tuyChon.thuLai — ép số lần thử lại, dùng khi nơi gọi muốn tự lo việc thử lại. */
 async function goi(hd,duLieu,tuyChon){
+  const C=window.CAU_HINH_WEB||{};
+  if(C.MOCK_LOCAL_DEMO&&window.MOCK_LOCAL_DEMO_API&&typeof window.MOCK_LOCAL_DEMO_API.goi==='function')
+    return window.MOCK_LOCAL_DEMO_API.goi(hd,duLieu,tuyChon);
   const t=tuyChon||{};
   const soLan=t.thuLai!=null?t.thuLai:(CHI_DOC[hd]?CHO.length:0);
   let cuoi=null;
