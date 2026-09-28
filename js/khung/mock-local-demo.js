@@ -16,10 +16,23 @@ const NGUOI_DUNG_DEMO={
   ten_vai_tro:'Quản trị (Demo local)'
 };
 
-/* Mã logic tối thiểu cho demo local:
+/* Bootstrap fallback: khai báo sẵn các hàm tối thiểu để người dùng không gặp
+   ReferenceError nếu bấm nút quá sớm hoặc khi trình duyệt còn giữ mã cũ trong cache.
+   Khi khối MA_LOGIC_DEMO nạp xong, các hàm này sẽ bị ghi đè bằng bản mô phỏng đầy đủ. */
+window.App=window.App||{};
+const THONG_BAO_BOOT='[Local Demo] Đang nạp lõi mô phỏng offline… vui lòng thử lại sau 1-2 giây.';
+function thongBaoBoot(){ try{ if(window.App&&typeof window.App.toast==='function') window.App.toast(THONG_BAO_BOOT); else console.info(THONG_BAO_BOOT); }catch(e){} }
+['run','tab','setAW','loadXlsx','check','expXlsxKQ','zoomBy','zoomReset','expCSV','expSVG','expPDF','sweep','sens','benchRun','onPat','chkAll','chkIC','optimise']
+  .forEach(ten=>{ if(typeof window[ten]!=='function') window[ten]=function(){ thongBaoBoot(); }; });
+if(typeof window.App.exportData!=='function') window.App.exportData=function(){ thongBaoBoot(); };
+if(typeof window.App.exportResults!=='function') window.App.exportResults=function(){ thongBaoBoot(); };
+if(typeof window.App.check!=='function') window.App.check=function(){ thongBaoBoot(); };
+if(typeof window.App.report!=='function') window.App.report=function(){ thongBaoBoot(); };
+
+/* Mã logic demo local:
    - phát sự kiện app:san-sang để khoi-dong.js tiếp tục
    - cung cấp App.toast dạng console để tránh lỗi khi gọi toast
-   - cung cấp fallback no-op cho các hàm runtime (run/tab/zoom/...) để bấm nút không văng ReferenceError */
+   - dựng luồng mô phỏng offline mức demo để đi end-to-end không cần backend thật */
 const MA_LOGIC_DEMO=`(function(){
   'use strict';
   window.App=window.App||{};
@@ -127,28 +140,28 @@ const MA_LOGIC_DEMO=`(function(){
   function loadXlsx(){ toast('[Local Demo] Nạp Excel offline chưa hỗ trợ đầy đủ, đang dùng dữ liệu fixture.'); }
   function check(){ setHTML('chkbody','<ul><li>Không phát hiện lỗi cấu trúc trong fixture demo local.</li></ul>'); var c=$('chkbox'); if(c) c.open=true; toast('Kiểm tra dữ liệu demo hoàn tất.'); }
   function expXlsxKQ(){ toast('[Local Demo] Xuất Excel kết quả chưa khả dụng offline.'); }
-  window.run=window.run||run;
-  window.tab=window.tab||tab;
-  window.zoomBy=window.zoomBy||zoomBy;
-  window.zoomReset=window.zoomReset||zoomReset;
-  window.expCSV=window.expCSV||expCSV;
-  window.expSVG=window.expSVG||expSVG;
-  window.expPDF=window.expPDF||expPDF;
-  window.sweep=window.sweep||sweep;
-  window.sens=window.sens||sens;
-  window.benchRun=window.benchRun||benchRun;
-  window.onPat=window.onPat||onPat;
-  window.chkAll=window.chkAll||chkAll;
-  window.chkIC=window.chkIC||chkIC;
-  window.optimise=window.optimise||optimise;
-  window.setAW=window.setAW||setAW;
-  window.loadXlsx=window.loadXlsx||loadXlsx;
-  window.check=window.check||check;
-  window.expXlsxKQ=window.expXlsxKQ||expXlsxKQ;
-  if(typeof window.App.exportData!=='function') window.App.exportData=function(){ toast('[Local Demo] Chưa có dữ liệu xuất chuẩn backend.'); };
-  if(typeof window.App.exportResults!=='function') window.App.exportResults=function(){ expCSV(); };
-  if(typeof window.App.check!=='function') window.App.check=check;
-  if(typeof window.App.report!=='function') window.App.report=function(phanHe){ toast('[Local Demo] Báo cáo '+phanHe+' chưa khả dụng offline.'); };
+  window.run=run;
+  window.tab=tab;
+  window.zoomBy=zoomBy;
+  window.zoomReset=zoomReset;
+  window.expCSV=expCSV;
+  window.expSVG=expSVG;
+  window.expPDF=expPDF;
+  window.sweep=sweep;
+  window.sens=sens;
+  window.benchRun=benchRun;
+  window.onPat=onPat;
+  window.chkAll=chkAll;
+  window.chkIC=chkIC;
+  window.optimise=optimise;
+  window.setAW=setAW;
+  window.loadXlsx=loadXlsx;
+  window.check=check;
+  window.expXlsxKQ=expXlsxKQ;
+  window.App.exportData=function(){ toast('[Local Demo] Chưa có dữ liệu xuất chuẩn backend.'); };
+  window.App.exportResults=function(){ expCSV(); };
+  window.App.check=check;
+  window.App.report=function(phanHe){ toast('[Local Demo] Báo cáo '+phanHe+' chưa khả dụng offline.'); };
   setTimeout(run,0);
   document.dispatchEvent(new Event('app:san-sang'));
 })();`;
